@@ -37,14 +37,14 @@ export async function GET(request: NextRequest) {
       `;
 
     const response = await octokit.graphql(query, { username });
-    //   @ts-ignore
+    
+    // @ts-expect-error: GitHub API response type is not strictly typed
     const calendar = response.user.contributionsCollection.contributionCalendar;
 
-    //   Flatten the weeks array to get all contribution days
-
-    // @ts-ignore
+    // Flatten the weeks array to get all contribution days
+    // @ts-expect-error: TypeScript cannot infer the structure of contributionDays
     const contributions = calendar.weeks.flatMap((week) =>
-      // @ts-ignore
+      // @ts-expect-error: week.contributionDays is not strictly typed
       week.contributionDays.map((day) => ({
         count: day.contributionCount,
         date: day.date,
@@ -52,16 +52,16 @@ export async function GET(request: NextRequest) {
     );
 
     return NextResponse.json({
-        user:{
-            totalContribution:calendar.totalContributions
-        },
-        contributions
-    })
+      user: {
+        totalContribution: calendar.totalContributions,
+      },
+      contributions,
+    });
   } catch (error) {
-    console.error("GITHUB API ERROR" , error)
+    console.error("GITHUB API ERROR", error);
     return NextResponse.json(
-        {error:"Failed to fetch github Data"},
-        {status:500}
-    )
+      { error: "Failed to fetch GitHub Data" },
+      { status: 500 }
+    );
   }
 }

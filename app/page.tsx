@@ -4,7 +4,6 @@ import Contact from "@/components/sections/Contact";
 import Hero from "@/components/sections/Hero";
 import Projects from "@/components/sections/Projects";
 import Skills from "@/components/sections/Skills";
-import Testimonials from "@/components/sections/Testimonials";
 
 import {motion} from "framer-motion"
 
@@ -14,7 +13,6 @@ export default function Home() {
  <main className="min-h-screen bg-background">
   <Hero/>
   <Skills/>
-  {/* <Testimonials/> */}
   <Projects/>
   {/* Github Stats Section */}
 

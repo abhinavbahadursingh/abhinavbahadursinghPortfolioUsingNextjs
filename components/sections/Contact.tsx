@@ -15,10 +15,10 @@ const Contact = () => {
           transition={{ duration: 0.5 }}
         >
           <h2 className="text-3xl font-bold mb-6">
-            Let's <span className="text-primary">Connect</span>
+            Lets <span className="text-primary">Connect</span>
           </h2>
           <p className="text-muted-foreground mb-8">
-            I'm always open to discussing new projects, creative ideas, or
+            I am always open to discussing new projects, creative ideas, or
             opportunities to be part of your visions.
           </p>
           <div className="flex gap-4 mb-8">
