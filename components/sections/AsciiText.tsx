@@ -1,7 +1,8 @@
 import { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 
-const vertexShader = `\`
+/* eslint-disable react/no-unescaped-entities */
+const vertexShader = `
 varying vec2 vUv;
 uniform float uTime;
 uniform float mouse;
@@ -21,7 +22,8 @@ void main() {
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(transformed, 1.0);
 }
-\``;
+`;
+/* eslint-enable react/no-unescaped-entities */
 
 
 const fragmentShader = `
