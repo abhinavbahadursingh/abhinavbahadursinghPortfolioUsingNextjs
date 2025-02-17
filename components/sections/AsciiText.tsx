@@ -1,7 +1,6 @@
 import { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 
-/* eslint-disable react/no-unescaped-entities */
 const vertexShader = `
 varying vec2 vUv;
 uniform float uTime;
@@ -23,8 +22,6 @@ void main() {
     gl_Position = projectionMatrix * modelViewMatrix * vec4(transformed, 1.0);
 }
 `;
-/* eslint-enable react/no-unescaped-entities */
-
 
 const fragmentShader = `
 varying vec2 vUv;
@@ -182,18 +179,18 @@ class AsciiFilter {
             for (let x = 0; x < w; x++) {
                 const i = (y * w + x) * 4;  // Correct pixel index calculation
                 const [r, g, b, a] = [imgData[i], imgData[i + 1], imgData[i + 2], imgData[i + 3]];
-    
+
                 if (a === 0) {
                     str += ' ';  // Transparent pixel, add space
                     continue;
                 }
-    
+
                 // Calculate grayscale value with standard luminosity method
                 const gray = (0.3 * r + 0.59 * g + 0.11 * b) / 255;  // Luminosity method for more accurate grayscale
                 let idx = Math.floor((1 - gray) * (this.charset.length - 1));  // Map to charset
-    
+
                 if (this.invert) idx = this.charset.length - idx - 1;  // Option to invert character set
-    
+
                 str += this.charset[idx];
             }
             str += '\n';  // New line for each row
@@ -201,7 +198,6 @@ class AsciiFilter {
     
         this.pre.innerHTML = str;  // Set the ASCII string to the pre element
     }
-    
 
     dispose() {
         document.removeEventListener('mousemove', this.onMouseMove);
@@ -267,300 +263,6 @@ class CanvasTxt {
     get height() {
         return this.canvas.height;
     }
-
-    get texture() {
-        return this.canvas;
-    }
 }
 
-interface CanvAsciiOptions {
-    text: string;
-    asciiFontSize: number;
-    textFontSize: number;
-    textColor: string;
-    planeBaseHeight: number;
-    enableWaves: boolean;
-}
-
-class CanvAscii {
-    textString: string;
-    asciiFontSize: number;
-    textFontSize: number;
-    textColor: string;
-    planeBaseHeight: number;
-    container: HTMLElement;
-    width: number;
-    height: number;
-    enableWaves: boolean;
-    camera: THREE.PerspectiveCamera;
-    scene: THREE.Scene;
-    mouse: { x: number; y: number };
-    textCanvas!: CanvasTxt;
-    texture!: THREE.CanvasTexture;
-    geometry: THREE.PlaneGeometry | undefined;
-    material: THREE.ShaderMaterial | undefined;
-    mesh!: THREE.Mesh;
-    renderer!: THREE.WebGLRenderer;
-    filter!: AsciiFilter;
-    center: { x: number; y: number } = { x: 0, y: 0 };
-    animationFrameId: number = 0;
-
-    constructor(
-        { text, asciiFontSize, textFontSize, textColor, planeBaseHeight, enableWaves }: CanvAsciiOptions,
-        containerElem: HTMLElement,
-        width: number,
-        height: number
-    ) {
-        this.textString = text;
-        this.asciiFontSize = asciiFontSize;
-        this.textFontSize = textFontSize;
-        this.textColor = textColor;
-        this.planeBaseHeight = planeBaseHeight;
-        this.container = containerElem;
-        this.width = width;
-        this.height = height;
-        this.enableWaves = enableWaves;
-
-        this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 1, 1000);
-        this.camera.position.z = 30;
-
-        this.scene = new THREE.Scene();
-        this.mouse = { x: 0, y: 0 };
-
-        this.onMouseMove = this.onMouseMove.bind(this);
-
-        this.setMesh();
-        this.setRenderer();
-    }
-
-    setMesh() {
-        this.textCanvas = new CanvasTxt(this.textString, {
-            fontSize: this.textFontSize,
-            fontFamily: 'IBM Plex Mono',
-            color: this.textColor,
-        });
-        this.textCanvas.resize();
-        this.textCanvas.render();
-
-        this.texture = new THREE.CanvasTexture(this.textCanvas.texture);
-        this.texture.minFilter = THREE.NearestFilter;
-
-        const textAspect = this.textCanvas.width / this.textCanvas.height;
-        const baseH = this.planeBaseHeight;
-        const planeW = baseH * textAspect;
-        const planeH = baseH;
-
-        this.geometry = new THREE.PlaneGeometry(planeW, planeH, 36, 36);
-        this.material = new THREE.ShaderMaterial({
-            vertexShader,
-            fragmentShader,
-            transparent: true,
-            uniforms: {
-                uTime: { value: 0 },
-                mouse: { value: 1.0 },
-                uTexture: { value: this.texture },
-                uEnableWaves: { value: this.enableWaves ? 1.0 : 0.0 }
-            },
-        });
-
-        this.mesh = new THREE.Mesh(this.geometry, this.material);
-        this.scene.add(this.mesh);
-    }
-
-    setRenderer() {
-        this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
-        this.renderer.setPixelRatio(1);
-        this.renderer.setClearColor(0x000000, 0);
-
-        this.filter = new AsciiFilter(this.renderer, {
-            fontFamily: 'IBM Plex Mono',
-            fontSize: this.asciiFontSize,
-            invert: true,
-        });
-
-        this.container.appendChild(this.filter.domElement);
-        this.setSize(this.width, this.height);
-
-        this.container.addEventListener('mousemove', this.onMouseMove);
-        this.container.addEventListener('touchmove', this.onMouseMove);
-    }
-
-    setSize(w: number, h: number) {
-        this.width = w;
-        this.height = h;
-
-        this.camera.aspect = w / h;
-        this.camera.updateProjectionMatrix();
-
-        this.filter.setSize(w, h);
-
-        this.center = { x: w / 2, y: h / 2 };
-    }
-
-    load() {
-        this.animate();
-    }
-
-    onMouseMove(evt: MouseEvent | TouchEvent) {
-        const e = (evt as TouchEvent).touches ? (evt as TouchEvent).touches[0] : (evt as MouseEvent);
-        const bounds = this.container.getBoundingClientRect();
-        const x = e.clientX - bounds.left;
-        const y = e.clientY - bounds.top;
-        this.mouse = { x, y };
-    }
-
-    animate() {
-        const animateFrame = () => {
-            this.animationFrameId = requestAnimationFrame(animateFrame);
-            this.render();
-        };
-        animateFrame();
-    }
-
-    render() {
-        const time = new Date().getTime() * 0.001;
-
-        this.textCanvas.render();
-        this.texture.needsUpdate = true;
-
-        (this.mesh.material as THREE.ShaderMaterial).uniforms.uTime.value = Math.sin(time);
-
-        this.updateRotation();
-        this.filter.render(this.scene, this.camera);
-    }
-
-    updateRotation() {
-        const x = map(this.mouse.y, 0, this.height, 0.5, -0.5);
-        const y = map(this.mouse.x, 0, this.width, -0.5, 0.5);
-
-        this.mesh.rotation.x += (x - this.mesh.rotation.x) * 0.05;
-        this.mesh.rotation.y += (y - this.mesh.rotation.y) * 0.05;
-    }
-
-    clear() {
-        this.scene.traverse((object) => {
-            const obj = object as unknown as THREE.Mesh
-            if (!obj.isMesh) return;
-              [obj.material].flat().forEach((material) => {
-                material.dispose();
-                Object.keys(material).forEach((key) => {
-                    const matProp = material[key as keyof typeof material];
-                    if (matProp && typeof matProp === 'object' && 'dispose' in matProp && typeof matProp.dispose === 'function') {
-                        matProp.dispose();
-                    }
-                });
-            });
-            obj.geometry.dispose();
-        })
-        this.scene.clear();
-    }
-
-    dispose() {
-        cancelAnimationFrame(this.animationFrameId);
-        this.filter.dispose();
-        this.container.removeChild(this.filter.domElement);
-        this.container.removeEventListener('mousemove', this.onMouseMove);
-        this.container.removeEventListener('touchmove', this.onMouseMove);
-        this.clear();
-        this.renderer.dispose();
-    }
-}
-
-interface ASCIITextProps {
-    text?: string;
-    asciiFontSize?: number;
-    textFontSize?: number;
-    textColor?: string;
-    planeBaseHeight?: number;
-    enableWaves?: boolean;
-}
-
-export default function ASCIIText({
-    text = 'AAll habibi..!',
-    asciiFontSize = 8,
-    textFontSize = 100,
-    textColor = '#fdf9f3',
-    planeBaseHeight = 5,
-    enableWaves = true
-}: ASCIITextProps) {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const asciiRef = useRef<CanvAscii | null>(null);
-
-    useEffect(() => {
-        if (!containerRef.current) return;
-
-        const { width, height } = containerRef.current.getBoundingClientRect();
-
-        asciiRef.current = new CanvAscii(
-            { text, asciiFontSize, textFontSize, textColor, planeBaseHeight, enableWaves },
-            containerRef.current,
-            width,
-            height
-        );
-        asciiRef.current.load();
-
-        const ro = new ResizeObserver((entries) => {
-            if (!entries[0]) return;
-            const { width: w, height: h } = entries[0].contentRect;
-            asciiRef.current?.setSize(w, h);
-        });
-        ro.observe(containerRef.current);
-
-        return () => {
-            ro.disconnect();
-            asciiRef.current?.dispose();
-        };
-    }, [text, asciiFontSize, textFontSize, textColor, planeBaseHeight, enableWaves]);
-
-    return (
-        <div
-            ref={containerRef}
-            style={{
-                position: 'absolute',
-                width: '100%',
-                height: '100%'
-            }}
-        >
-            <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&display=swap');
-
-        body {
-          margin: 0;
-          padding: 0;
-        }
-
-        canvas {
-          position: absolute;
-          left: 0;
-          top: 0;
-          width: 100%;
-          height: 100%;
-          image-rendering: optimizeSpeed;
-          image-rendering: -moz-crisp-edges;
-          image-rendering: -o-crisp-edges;
-          image-rendering: -webkit-optimize-contrast;
-          image-rendering: optimize-contrast;
-          image-rendering: crisp-edges;
-          image-rendering: pixelated;
-        }
-
-        pre {
-          margin: 0;
-          user-select: none;
-          padding: 0;
-          line-height: 1em;
-          text-align: left;
-          position: absolute;
-          left: 0;
-          top: 0;
-          background-image: radial-gradient(circle, #ff6188 0%, #fc9867 50%, #ffd866 100%);
-          background-attachment: fixed;
-          -webkit-text-fill-color: transparent;
-          -webkit-background-clip: text;
-          z-index: 9;
-          mix-blend-mode: difference;
-        }
-      `}</style>
-        </div>
-    );
-}
+export { AsciiFilter, CanvasTxt };
