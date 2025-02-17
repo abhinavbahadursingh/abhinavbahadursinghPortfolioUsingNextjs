@@ -7,9 +7,6 @@ import Hero from "@/components/sections/Hero";
 import Projects from "@/components/sections/Projects";
 import Skills from "@/components/sections/Skills";
 import { motion } from "framer-motion";
-import Cursor from "@/components/sections/Cursor"; // Import your custom cursor
-import FollowCursor from "@/components/ui/FollowCursor"; // Import FollowCursor component
-import ClickSpark from "@/components/ui/ClickSpark"; // Import FollowCursor component
 import ASCIIText from "@/components/sections/AsciiText";
 
 export default function Home() {

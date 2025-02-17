@@ -23,6 +23,7 @@ void main() {
 }
 `;
 
+
 const fragmentShader = `
 varying vec2 vUv;
 uniform float mouse;
@@ -173,25 +174,32 @@ class AsciiFilter {
     asciify(ctx: CanvasRenderingContext2D, w: number, h: number) {
         const imgData = ctx.getImageData(0, 0, w, h).data;
         let str = '';
+        
+        // Loop through each pixel
         for (let y = 0; y < h; y++) {
             for (let x = 0; x < w; x++) {
-                const i = x * 4 + y * 4 * w;
+                const i = (y * w + x) * 4;  // Correct pixel index calculation
                 const [r, g, b, a] = [imgData[i], imgData[i + 1], imgData[i + 2], imgData[i + 3]];
-
+    
                 if (a === 0) {
-                    str += ' ';
+                    str += ' ';  // Transparent pixel, add space
                     continue;
                 }
-
-                let gray = (0.3 * r + 0.6 * g + 0.1 * b) / 255;
-                let idx = Math.floor((1 - gray) * (this.charset.length - 1));
-                if (this.invert) idx = this.charset.length - idx - 1;
+    
+                // Calculate grayscale value with standard luminosity method
+                const gray = (0.3 * r + 0.59 * g + 0.11 * b) / 255;  // Luminosity method for more accurate grayscale
+                let idx = Math.floor((1 - gray) * (this.charset.length - 1));  // Map to charset
+    
+                if (this.invert) idx = this.charset.length - idx - 1;  // Option to invert character set
+    
                 str += this.charset[idx];
             }
-            str += '\n';
+            str += '\n';  // New line for each row
         }
-        this.pre.innerHTML = str;
+    
+        this.pre.innerHTML = str;  // Set the ASCII string to the pre element
     }
+    
 
     dispose() {
         document.removeEventListener('mousemove', this.onMouseMove);
