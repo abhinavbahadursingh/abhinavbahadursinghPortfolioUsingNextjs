@@ -5,6 +5,7 @@ import { Github, Linkedin, Mail } from "lucide-react";
 import { Card } from "../ui/card";
 import ContactForm from "../contact-form";
 import Image from "next/image";
+
 const Contact = () => {
   return (
     <section className="container mx-auto px-4 py-20">
@@ -15,25 +16,25 @@ const Contact = () => {
           transition={{ duration: 0.5 }}
         >
           <h2 className="text-3xl font-bold mb-6">
-            Lets <span className="text-primary">Connect</span>
+            Let's <span className="text-primary">Connect</span>
           </h2>
           <p className="text-muted-foreground mb-8">
             I am always open to discussing new projects, creative ideas, or
-            opportunities to be part of your visions.
+            opportunities to be part of your vision.
           </p>
           <div className="flex gap-4 mb-8">
-            <Button variant={"outline"} size={"icon"} asChild>
-              <a href="https://github.com/abhinavbahadursingh" target="_blank">
+            <Button variant="outline" size="icon" asChild>
+              <a href="https://github.com/abhinavbahadursingh" target="_blank" rel="noopener noreferrer">
                 <Github className="w-5 h-5" />
               </a>
             </Button>
-            <Button variant={"outline"} size={"icon"} asChild>
-              <a href="https://www.linkedin.com/" target="_blank">
+            <Button variant="outline" size="icon" asChild>
+              <a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer">
                 <Linkedin className="w-5 h-5" />
               </a>
             </Button>
-            <Button variant={"outline"} size={"icon"} asChild>
-              <a href="abhinavbahadursingh69@gmail.com" target="_blank">
+            <Button variant="outline" size="icon" asChild>
+              <a href="mailto:abhinavbahadursingh69@gmail.com" target="_blank" rel="noopener noreferrer">
                 <Mail className="w-5 h-5" />
               </a>
             </Button>
@@ -42,6 +43,7 @@ const Contact = () => {
             <ContactForm />
           </Card>
         </motion.div>
+
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -49,10 +51,11 @@ const Contact = () => {
           className="flex justify-center items-center mt-20"
         >
           <Image
-            src={"/contact.svg"}
+            src="/contact.svg"
             alt="Contact Illustrations"
             width={600}
             height={600}
+            objectFit="contain"  // Ensures the image maintains its aspect ratio
           />
         </motion.div>
       </div>
