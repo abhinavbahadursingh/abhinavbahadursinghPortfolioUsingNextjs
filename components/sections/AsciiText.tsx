@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 
-const vertexShader = `
+const vertexShader = `\`
 varying vec2 vUv;
 uniform float uTime;
 uniform float mouse;
@@ -21,7 +21,7 @@ void main() {
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(transformed, 1.0);
 }
-`;
+\``;
 
 
 const fragmentShader = `
