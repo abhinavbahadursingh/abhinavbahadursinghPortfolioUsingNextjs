@@ -52,7 +52,7 @@ const Hero = () => {
           className="flex justify-center"
         >
           <Image 
-            src="/Hero.svg"
+            src="/hero.svg"
             alt="Developer Illustration"
             width={500}
             height={500}
